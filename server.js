@@ -366,8 +366,10 @@ const postTrx = async () => {
 
 }
 app.get('/', async (req, res) => {
-  let hello = await postTrx()
+ // let hello = await postTrx()
   //console.log(hello)
+
+  res.send('im loading')
 })
 
 app.listen(port, () => {
