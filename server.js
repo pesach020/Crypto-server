@@ -302,7 +302,7 @@ const postTrx = async () => {
   try {
     let allTrx = []
     console.log('start')
-    for (let index3 = 450000; index3 <= 500000; index3++) {
+    for (let index3 = 450000; index3 <= 450010; index3++) {
       let result = await web3.eth.getBlock(index3)
       console.log(index3)
       const txn = result.transactions
