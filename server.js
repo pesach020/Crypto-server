@@ -3,6 +3,8 @@ const converter = require('hex2dec')
 const express = require('express')
 const mongoose = require('mongoose')
 const app = express()
+var handlebars = require('express-handlebars')
+  .create({ defaultLayout:'main' });
 const Web3 = require("web3")
 const postTran = require('../crypto-master/Models/Transaction')
 const port =process.env.PORT|| 5050
