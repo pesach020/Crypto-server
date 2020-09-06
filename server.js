@@ -12,7 +12,7 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(cors())
 let address = '0x07ee55aa48bb72dcc6e9d78256648910de513eca'
-mongoose.connect('mongodb+srv://orbb92:e8949881@cluster0-jihpp.mongodb.net/CRYPTO?retryWrites=true&w=majority', {
+mongoose.connect(process.env.MONGODB_URI||'mongodb+srv://orbb92:e8949881@cluster0-jihpp.mongodb.net/CRYPTO?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }, () => {
