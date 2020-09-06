@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const app = express()
 const Web3 = require("web3")
 const postTran = require('../crypto-master/Models/Transaction')
-const port = 5050
+const port =process.env.PORT|| 5050
 const cors = require('cors')
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
