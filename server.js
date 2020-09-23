@@ -1,36 +1,38 @@
-const converter = require('hex2dec')
+const converter = require('hex2dec')// convert from hexa to decimal
 const express = require('express')
-const mongoose = require('mongoose')
+const mongoose = require('mongoose')// for mongdodb
 const app = express()
-const async = require('async')
-const delay = require('util').promisify(setTimeout);
+//const async = require('async')
+//const delay = require('util').promisify(setTimeout);
 
-var handlebars = require('express-handlebars')
+var handlebars = require('express-handlebars') //for heroku deployment
   .create({
     defaultLayout: 'main'
   });
-const Web3 = require("web3")
-const postTran = require('./Models/Transaction')
-const port = process.env.PORT || 5050
-const cors = require('cors')
-const bodyParser = require('body-parser')
-const { promises } = require('fs')
-app.use(bodyParser.json())
-app.use(cors())
-let address = '0x07ee55aa48bb72dcc6e9d78256648910de513eca'
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://orbb92:e8949881@cluster0-jihpp.mongodb.net/CRYPTO?retryWrites=true&w=majority', {
+const Web3 = require("web3") //remote to the evm
+const postTran = require('./Models/Transaction') //model for posting a transaction
+const port = process.env.PORT || 5050 //defind the env port (localy or deployed)
+const cors = require('cors')  // communication between front and end 
+const bodyParser = require('body-parser') //parsing 
+const { promises } = require('fs');
+require('dotenv').config()
+app.use(bodyParser.json()) //parsing 
+app.use(cors()) 
+//let address = '0x07ee55aa48bb72dcc6e9d78256648910de513eca'
+mongoose.connect(process.env.MONGODB_URI || process.env.DB_CONNECTION, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }, () => {
 
-})
+})//connection to db
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+var db = mongoose.connection;// connect to db
+
+db.on('error', console.error.bind(console, 'connection error:')); //connection status 
 db.on('open', function callback() {
   console.log("connected to db");
 });
-const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/8d3bc27c75c84c9c9808a57c80c49d86"))
+const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/8d3bc27c75c84c9c9808a57c80c49d86")) //node connection 
 
 const minABI = [
   // balanceOf
@@ -150,17 +152,17 @@ const minABI = [
     "name": "Approval",
     "type": "event"
   }
-];
+];// for tokens and contracts information 
 
 const getToken = async (input, tokenadd) => {
-  let sign = input.slice(0, 10)
-  let addTo = input.slice(34, 74)
+  let sign = input.slice(0, 10) // the sign
+  let addTo = input.slice(34, 74) // whos the contract 
 
-  let amount = input.slice(75, )
-  amount = converter.hexToDec(amount)
-  const toknAddress = '0x68d57c9a1c35f63e2c83ee8e49a64e9d70528d25' //sirin
+  let amount = input.slice(75, ) //token amount
+  amount = converter.hexToDec(amount)// convert to dec
+  const toknAddress = '0x68d57c9a1c35f63e2c83ee8e49a64e9d70528d25' //sirin example
 
-  let contract = new web3.eth.Contract(minABI, tokenadd)
+  let contract = new web3.eth.Contract(minABI, tokenadd) //get information about the token/contract - 
 
   let name = await contract.methods.symbol().call()
   return ({
@@ -306,21 +308,21 @@ const getBlockInfo = async (blocknumber) => {
     const txn = result.transactions
     let detailTxn = await Promise.all(txn.map(async (item, index) => {
       try {
-        var transaction = await web3.eth.getTransaction(item)
-        if (transaction.to !== null) //a point that a contact is made
+        var transaction = await web3.eth.getTransaction(item)//get trx
+        if (transaction.to !== null) //a point that a contract is made
           transaction.to = transaction.to.toLowerCase()
-        if (parseInt(transaction.value) === 0 && transaction.to !== null) {
+        if (parseInt(transaction.value) === 0 && transaction.to !== null) {//is a token?
           let res = await getToken(transaction.input, transaction.to)
           transaction.value = res.amount
           transaction.token = res.name
         } else
-          transaction.value = web3.utils.fromWei(transaction.value, "ether")
-        transaction.gasPrice = web3.utils.fromWei(transaction.gasPrice, "ether")
-        let receipt = await web3.eth.getTransactionReceipt(item)
-        transaction.gasUsed = receipt.gasUsed
-        transaction.timestamp = result.timestamp * 1000
+          transaction.value = web3.utils.fromWei(transaction.value, "ether")//value of ether
+        transaction.gasPrice = web3.utils.fromWei(transaction.gasPrice, "ether")//gas price
+        let receipt = await web3.eth.getTransactionReceipt(item)//get the reciept of the trx
+        transaction.gasUsed = receipt.gasUsed //gas used
+        transaction.timestamp = result.timestamp * 1000 //time 
         //transaction.time = new Date(transaction.timestamp)
-        transaction.fee = parseFloat(transaction.gasPrice) * transaction.gasUsed
+        transaction.fee = parseFloat(transaction.gasPrice) * transaction.gasUsed //fee of the trx
         //allTrx.push(transaction)
         transaction.from = transaction.from.toLowerCase()
         transaction.hash = transaction.hash.toLowerCase()
